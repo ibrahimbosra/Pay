@@ -1,59 +1,43 @@
-خرابة
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Miga Min777ing - Payment</title>
-<style>
-  body {
-    background-color: #002740;
-    color: white;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 2rem;
-  }
-  #status {
-    margin-top: 20px;
-    font-size: 1.2rem;
-  }
-  #ton-connect-button button {
-    background-color: #0b7dda;
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    font-size: 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-</style>
-<script type="module">
-  import { TonConnectUI } from "https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js";
-
-  // تأكد إن صفحة WebApp مربوطة مع تيليجرام
-  const tg = window.Telegram?.WebApp;
-
-  tg.ready();
-
-  const tonConnectUI = new TonConnectUI({
-    manifestUrl: "https://ibrahimbosra.github.io/Pay/tonconnect-manifest.json",
-    buttonRootId: "ton-connect-button"
-  });
-
-  tonConnectUI.onStatusChange(wallet => {
-    const status = document.getElementById('status');
-    if (wallet?.account?.address) {
-      status.innerHTML = `🔗 Connected:<br>${wallet.account.address}`;
-      // يمكن ترسل العنوان لتيليجرام أو تعمل أي فعل آخر
-    } else {
-      status.innerText = "Not connected";
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Miga Mining - Payment</title>
+  <style>
+    body {
+      background-color: #002740;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
     }
-  });
-</script>
+    #status {
+      margin-top: 20px;
+      font-size: 1.1rem;
+    }
+  </style>
+  <script type="module">
+    import { TonConnectUI } from "https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js";
+
+    const tonConnectUI = new TonConnectUI({
+      manifestUrl: "https://raw.githubusercontent.com/ibrahimbosra/Pay/main/tonconnect-manifest.json",
+      buttonRootId: "ton-connect-button"
+    });
+
+    tonConnectUI.onStatusChange(wallet => {
+      const status = document.getElementById('status');
+      if (wallet?.account?.address) {
+        status.innerHTML = `🔗 Connected:<br>${wallet.account.address}`;
+      } else {
+        status.innerText = "Not connected";
+      }
+    });
+  </script>
 </head>
 <body>
   <h1>Miga Mining - Payment</h1>
   <div id="ton-connect-button"></div>
-  <p id="status">Not connected</p>
+  <div id="status">Not connected</div>
 </body>
 </html>
