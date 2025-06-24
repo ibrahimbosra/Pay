@@ -1,0 +1,9 @@
+{
+  "manifest_version": "1",
+  "name": "Miga Mining",
+  "description": "Payment for Miga Mining plans",
+  "url": "https://ibrahimbosra.github.io/Pay/",
+  "icons": ["https://ibrahimbosra.github.io/Pay/icon.png"],
+  "bridge_url": "https://bridge.tonapi.io/bridge",
+  "universal_url": "https://ton-connect.github.io/open-url"
+}
