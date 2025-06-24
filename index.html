@@ -35,61 +35,83 @@
       font-size: 18px;
       color: #333;
     }
+    #error-message {
+      color: red;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>ربط المحفظة وإتمام الدفع</h1>
   <div id="connect-wallet"></div>
   <div id="wallet-status">غير متصل</div>
+  <div id="error-message"></div>
 
   <script>
-    // تهيئة TonConnect UI
-    const tonConnectUI = new tonconnectui.TonConnectUI({
-      manifestUrl: 'https://your-app.com/tonconnect-manifest.json', // استبدل برابط ملف الـ manifest
-      buttonRootId: 'connect-wallet'
-    });
-
-    // تحديث حالة المحفظة
-    tonConnectUI.onStatusChange(wallet => {
-      const statusDiv = document.getElementById('wallet-status');
-      if (wallet) {
-        statusDiv.textContent = `متصل: ${wallet.account.address.slice(0, 6)}...`;
-        showPaymentButton();
-      } else {
-        statusDiv.textContent = 'غير متصل';
-      }
-    });
-
-    // دالة لإظهار زر الدفع بعد ربط المحفظة
-    function showPaymentButton() {
-      const existingButton = document.getElementById('payment-button');
-      if (!existingButton) {
-        const paymentButton = document.createElement('button');
-        paymentButton.id = 'payment-button';
-        paymentButton.textContent = 'إتمام الدفع (1 TON)';
-        paymentButton.onclick = initiatePayment;
-        document.body.appendChild(paymentButton);
-      }
+    // دالة لعرض رسائل الخطأ
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
     }
 
-    // دالة لإتمام الدفع
-    async function initiatePayment() {
+    // التحقق من تحميل مكتبة TonConnect UI
+    if (typeof tonconnectui === 'undefined') {
+      showError('فشل تحميل مكتبة TonConnect UI. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.');
+    } else {
+      // تهيئة TonConnect UI
+      let tonConnectUI;
       try {
-        const transaction = {
-          validUntil: Math.floor(Date.now() / 1000) + 60, // صالحة لمدة 60 ثانية
-          messages: [
-            {
-              address: 'UQADR_wO9cnAQYUGErMlhP57EFWK78aubu20uxUw-n63Tuo4', // عنوان المحفظة الخاص بك
-              amount: '1000000000', // 1 TON (بالـ nanoTON)
-              payload: 'Payment for Airdrop' // تعليق اختياري
-            }
-          ]
-        };
-        const result = await tonConnectUI.sendTransaction(transaction);
-        alert('تم إرسال المعاملة بنجاح!');
+        tonConnectUI = new tonconnectui.TonConnectUI({
+          manifestUrl: 'https://raw.githubusercontent.com/ibrahimbosra/Pay/main/tonconnect-manifest.json',
+          buttonRootId: 'connect-wallet'
+        });
+        console.log('تم تهيئة TonConnect UI بنجاح');
       } catch (error) {
-        console.error('فشل الدفع:', error);
-        alert('فشل إتمام الدفع. تأكد من ربط المحفظة وحاول مرة أخرى.');
+        showError('خطأ في تهيئة TonConnect UI: ' + error.message);
+        console.error('خطأ في تهيئة TonConnect UI:', error);
+      }
+
+      // تحديث حالة المحفظة
+      tonConnectUI.onStatusChange(wallet => {
+        const statusDiv = document.getElementById('wallet-status');
+        if (wallet) {
+          statusDiv.textContent = `متصل: ${wallet.account.address.slice(0, 6)}...`;
+          showPaymentButton();
+        } else {
+          statusDiv.textContent = 'غير متصل';
+        }
+      });
+
+      // دالة لإظهار زر الدفع بعد ربط المحفظة
+      function showPaymentButton() {
+        const existingButton = document.getElementById('payment-button');
+        if (!existingButton) {
+          const paymentButton = document.createElement('button');
+          paymentButton.id = 'payment-button';
+          paymentButton.textContent = 'إتمام الدفع (1 TON)';
+          paymentButton.onclick = initiatePayment;
+          document.body.appendChild(paymentButton);
+        }
+      }
+
+      // دالة لإتمام الدفع
+      async function initiatePayment() {
+        try {
+          const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 60, // صالحة لمدة 60 ثانية
+            messages: [
+              {
+                address: 'UQADR_wO9cnAQYUGErMlhP57EFWK78aubu20uxUw-n63Tuo4', // عنوان المحفظة الخاص بك
+                amount: '1000000000', // 1 TON (بالـ nanoTON)
+                payload: 'Payment for Airdrop' // تعليق اختياري
+              }
+            ]
+          };
+          const result = await tonConnectUI.sendTransaction(transaction);
+          alert('تم إرسال المعاملة بنجاح!');
+        } catch (error) {
+          console.error('فشل الدفع:', error);
+          showError('فشل إتمام الدفع: ' + error.message);
+        }
       }
     }
   </script>
