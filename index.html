@@ -1,47 +1,48 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>TON Connect</title>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <style>
-      body {
-        background: #002740;
-        color: #fff;
-        text-align: center;
-        font-family: sans-serif;
-        padding-top: 50px;
-      }
-      button {
-        padding: 10px 20px;
-        background-color: #00bfff;
-        border: none;
-        border-radius: 10px;
-        color: white;
-        font-size: 16px;
-        margin-top: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Connect TON Wallet</h1>
-    <div id="ton-connect"></div>
-    <p id="wallet-address"></p>
+<head>
+  <title>Miga Mining - Wallet Connect</title>
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <style>
+    body {
+      background-color: #002740;
+      color: white;
+      text-align: center;
+      padding-top: 50px;
+      font-family: sans-serif;
+    }
+    /* أخفي العنوان التاني اللي بيجي تلقائي */
+    .tonconnectui__wallet-address {
+      display: none !important;
+    }
+    #wallet-address {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #00ffcc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connect TON Wallet</h1>
+  <div id="ton-connect"></div>
+  <p id="wallet-address"></p>
 
-    <script>
-      const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: "https://your-host.com/tonconnect-manifest.json", // غيره لاحقاً
-        buttonRootId: "ton-connect"
-      });
+  <script>
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://ibrahimbosra.github.io/Pay/tonconnect-manifest.json",
+      buttonRootId: "ton-connect"
+    });
 
-      tonConnectUI.onStatusChange(async (walletInfo) => {
-        if (walletInfo && walletInfo.account) {
-          const address = walletInfo.account.address;
-          document.getElementById("wallet-address").textContent =
-            "Wallet: " + address.slice(0, 4) + "..." + address.slice(-4);
-        } else {
-          document.getElementById("wallet-address").textContent = "";
-        }
-      });
-    </script>
-  </body>
+    tonConnectUI.onStatusChange(async (walletInfo) => {
+      if (walletInfo && walletInfo.account) {
+        const address = walletInfo.account.address;
+        document.getElementById("wallet-address").textContent =
+          address.slice(0, 4) + "..." + address.slice(-4);
+      } else {
+        document.getElementById("wallet-address").textContent = "";
+      }
+    });
+  </script>
+</body>
 </html>
