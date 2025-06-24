@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تطبيق أيردروب - ربط المحفظة والدفع</title>
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -55,7 +55,7 @@
 
     // التحقق من تحميل مكتبة TonConnect UI
     if (typeof tonconnectui === 'undefined') {
-      showError('فشل تحميل مكتبة TonConnect UI. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.');
+      showError('فشل تحميل مكتبة TonConnect UI. تحقق من اتصالك بالإنترنت أو حاول متصفحًا آخر.');
     } else {
       // تهيئة TonConnect UI
       let tonConnectUI;
