@@ -4,6 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Miga Mining - Payment</title>
+  <style>
+    body {
+      background-color: #002740;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+    #ton-connect-button button {
+      background-color: #0b7dda;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
   <script type="module">
     import { TonConnectUI } from "https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js";
 
@@ -11,13 +33,6 @@
       manifestUrl: "https://ibrahimbosra.github.io/Pay/tonconnect-manifest.json",
       buttonRootId: "ton-connect-button"
     });
-
-    // إظهار عنوان المحفظة بعد الاتصال
-    tonConnectUI.uiOptions = {
-      actionsConfiguration: {
-        additionalActions: [],
-      },
-    };
 
     tonConnectUI.onStatusChange(wallet => {
       const status = document.getElementById('status');
@@ -29,9 +44,9 @@
     });
   </script>
 </head>
-<body style="background-color:#002740; color:white; font-family:sans-serif; text-align:center; padding:2rem;">
+<body>
   <h1>Miga Mining - Payment</h1>
   <div id="ton-connect-button"></div>
-  <p id="status" style="margin-top: 20px;">Not connected</p>
+  <p id="status">Not connected</p>
 </body>
 </html>
