@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Miga Mining - Payment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { TonConnectUI } from "https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js";
+
+    const tonConnectUI = new TonConnectUI({
+      manifestUrl: 'https://tonconnect.github.io/demo-dapp-with-react/tonconnect-manifest.json',
+      buttonRootId: 'connect-button'
+    });
+
+    const addressEl = document.getElementById("wallet-address");
+    const payBtn = document.getElementById("pay-btn");
+
+    let connectedWallet = null;
+
+    tonConnectUI.onStatusChange(async (wallet) => {
+      if (wallet) {
+        connectedWallet = wallet;
+        const fullAddress = wallet.account.address;
+        const shortAddress = `${fullAddress.slice(0, 4)}...${fullAddress.slice(-4)}`;
+        addressEl.textContent = `Connected: ${shortAddress}`;
+        payBtn.style.display = "block";
+      } else {
+        connectedWallet = null;
+        addressEl.textContent = "Not connected";
+        payBtn.style.display = "none";
+      }
+    });
+
+    document.getElementById("pay-btn").addEventListener("click", async () => {
+      if (!connectedWallet) return;
+
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 600, // 10 دقائق
+        messages: [
+          {
+            address: "UQADR_wO9cnAQYUGErMlhP57EFWK78aubu20uxUw-n63Tuo4",
+            amount: (1 * 1e9).toString(), // 1 TON
+          }
+        ]
+      };
+
+      try {
+        await tonConnectUI.sendTransaction(transaction);
+        alert("Transaction sent!");
+      } catch (err) {
+        alert("Transaction failed or cancelled.");
+        console.error(err);
+      }
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #002740;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #wallet-address {
+      margin: 20px 0;
+      font-size: 16px;
+    }
+    #pay-btn {
+      display: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #04bfbf;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Miga Mining - Payment</h1>
+  <div id="connect-button"></div>
+  <div id="wallet-address">Not connected</div>
+  <button id="pay-btn">Pay 1 TON</button>
+</body>
+</html>
