@@ -1,665 +1,342 @@
-<!doctype html>
-<html lang="en"> 
- <head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Miga Mining - TON Mining</title> 
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script> 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&amp;display=swap" rel="stylesheet"> 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
-  <style>
-    :root {
-      --primary: #0066cc;
-      --secondary: #004d99;
-      --accent: #ff9900;
-      --dark: #001a33;
-      --light: #f0f7ff;
-      --success: #28a745;
-      --danger: #dc3545;
-      --warning: #ffc107;
-      --bronze: #cd7f32;
-      --silver: #c0c0c0;
-      --gold: #ffd700;
-      --platinum: #e5e4e2;
-      --diamond: #b9f2ff;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #001a33, #003366);
-      color: var(--light);
-      min-height: 100vh;
-      padding: 10px 0 60px;
-      text-align: center;
-      font-size: 14px;
-    }
-    
-    .plan-title {
-      font-weight: bold;
-      font-size: 18px;
-      margin: 10px 0;
-      color: var(--accent);
-    }
-    
-    #wallet-message, #plan-message, #alert-message {
-      display: none;
-      position: fixed; 
-      bottom: 70px; 
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.9);
-      color: var(--danger);
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      z-index: 1000;
-      font-size: 12px;
-    }
-    
-    #alert-message {
-      top: 20%;
-      bottom: auto;
-      padding: 15px 25px;
-      border-radius: 15px;
-      font-size: 14px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      max-width: 80%;
-    }
-    
-    #ton-connect {
-      margin: 10px auto;
-      display: flex;
-      justify-content: center;
-    }
-    
-    #points-display {
-      margin: 10px 0;
-      font-size: 14px;
-      background: rgba(0, 40, 80, 0.5);
-      padding: 8px 15px;
-      border-radius: 20px;
-      display: inline-block;
-    }
-    
-    #points-display span { 
-      font-weight: bold; 
-      color: var(--accent);
-    }  
-    
-    .circle-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      max-width: 100%;
-      margin: 0 auto;
-    }
-    
-    .plan-row, .centered-row {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-    }  
-    
-    #free-claim {
-      margin-top: 25px;
-      white-space: nowrap;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      padding: 0 15px;
-    }
-    
-    #free-claim .miga-points,
-    #free-claim .days-title {
-      display: inline;
-      margin: 0 3px;
-    }
-    
-    .plan-row { 
-      justify-content: space-between; 
-      max-width: 320px;  
-    }
-    
-    .circle-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
-    
-    .circle-card {
-      width: 100px;
-      height: 100px;
-      background: linear-gradient(135deg, rgba(0, 51, 102, 0.8), rgba(0, 30, 60, 0.8));
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 12px;
-      padding: 8px;
-      cursor: pointer;
-      border: 1px solid rgba(0, 102, 204, 0.3);
-    }
-    
-    .special {
-      background: linear-gradient(135deg, rgba(182, 79, 200, 0.8), rgba(122, 40, 168, 0.8));
-    }
-    
-    .badge {
-      position: absolute; 
-      top: -18px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 4px 10px;
-      border-radius: 15px;
-      font-size: 10px;
-      font-weight: bold;
-      white-space: nowrap;
-      min-width: 70px;
-      text-align: center;
-      z-index: 10;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .bronze-badge {
-      background: var(--bronze);
-      color: #fff;
-      border: 1px solid #a65a2a;
-    }
-    
-    .silver-badge {
-      background: var(--silver);
-      color: #333;
-      border: 1px solid #a0a0a0;
-    }
-    
-    .gold-badge {
-      background: var(--gold);
-      color: #333;
-      border: 1px solid #d4af37;
-    }
-    
-    .platinum-badge {
-      background: var(--platinum);
-      color: #333;
-      border: 1px solid #c0c0c0;
-    }
-    
-    .diamond-badge {
-      background: var(--diamond);
-      color: #333;
-      border: 1px solid #a3dae9;
-    }
-    
-    .miga-points {
-      font-size: 14px;
-      font-weight: bold;
-      color: var(--accent);
-    }
-    
-    .days-title {
-      font-size: 12px;
-      font-weight: bold;
-    }
-    
-    .ton-amount, .speed-multiplier {
-      font-size: 10px;
-      color: #ddd;
-    }
-    
-    .external-countdown {
-      font-size: 10px; 
-      font-weight: 600;
-      color: var(--accent);
-      margin-top: 5px;
-      height: 14px;
-      display: none;
-    }
-    
-    .active-pulse {
-      animation: pulse 2s infinite;
-      box-shadow: 0 0 15px rgba(0, 200, 255, 0.7);
-    }
-    
-    /* إصلاح تأثير النبض للزر المجاني */
-    #free-claim.collected {
-      animation: pulse 0.8s 1;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-    
-    .circle-card.free {
-      width: 150px;
-      height: 50px;
-      border-radius: 30px;
-      background: rgba(60, 60, 60, 0.6);
-      cursor: not-allowed;
-    }
-    
-    .circle-card.free.active {
-      background: linear-gradient(to right, var(--success), #1e7e34);
-      cursor: pointer;
-    }
-    
-    .bottom-nav {
-      position: fixed; 
-      bottom:0; 
-      left:0; 
-      width:100%;
-      background: rgba(10, 30, 50, 0.95);
-      display: flex; 
-      justify-content: space-around;
-      padding:8px 0; 
-    }
-    
-    .nav-item {
-      color:#aaa; 
-      font-size:10px;
-      text-align:center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      padding: 3px 10px;
-    }
-    
-    .nav-item i {
-      font-size: 16px;
-    }
-    
-    .nav-item.active { 
-      color: var(--accent);
-    }
-    
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin: 10px 0;
-      flex-wrap: wrap;
-    }
-    
-    .stat-card {
-      background: rgba(0, 40, 80, 0.5);
-      border-radius: 10px;
-      padding: 8px 12px;
-      min-width: 100px;
-    }
-    
-    .stat-value {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent);
-    }
-    
-    .stat-label {
-      font-size: 10px;
-      color: #aaa;
-    }
-  </style> 
- </head> 
- <body> 
-  <div class="plan-title"><i class="fas fa-cube"></i> Miga Mining</div> 
-  <div id="ton-connect"></div> 
-  <div class="plan-title">Choose Your Mining Plan</div> 
-  <div class="circle-wrapper"> 
-   <div class="plan-row"> 
-    <div class="circle-container"> 
-     <div class="badge bronze-badge">Bronze</div>
-     <div class="circle-card" data-days="7" onclick="handlePlanClick(0.5,7,1,this)"> 
-      <div class="miga-points">0.0000 Mg</div> 
-      <div class="days-title">7 Days</div> 
-      <div class="ton-amount">0.5 TON</div> 
-      <div class="speed-multiplier">Speed 1×</div> 
-     </div> 
-     <div class="external-countdown" id="countdown-7d"></div> 
-    </div> 
-    <div class="circle-container"> 
-     <div class="badge silver-badge">Silver</div>
-     <div class="circle-card" data-days="15" onclick="handlePlanClick(0.75,15,1.5,this)"> 
-      <div class="miga-points">0.0000 Mg</div> 
-      <div class="days-title">15 Days</div> 
-      <div class="ton-amount">0.75 TON</div> 
-      <div class="speed-multiplier">Speed 1.5×</div> 
-     </div> 
-     <div class="external-countdown" id="countdown-15d"></div> 
-    </div> 
-   </div> 
-   <div class="centered-row"> 
-    <div class="circle-container"> 
-     <div class="badge gold-badge">Gold</div>
-     <div class="circle-card special" data-days="30" onclick="handlePlanClick(1,30,2,this)"> 
-      <div class="miga-points">0.0000 Mg</div> 
-      <div class="days-title">30 Days</div> 
-      <div class="ton-amount">1 TON</div> 
-      <div class="speed-multiplier">Speed 2×</div> 
-     </div> 
-     <div class="external-countdown" id="countdown-30d"></div> 
-    </div> 
-   </div> 
-   <div class="plan-row"> 
-    <div class="circle-container"> 
-     <div class="badge platinum-badge">Platinum</div>
-     <div class="circle-card" data-days="60" onclick="handlePlanClick(1.5,60,3,this)"> 
-      <div class="miga-points">0.0000 Mg</div> 
-      <div class="days-title">60 Days</div> 
-      <div class="ton-amount">1.5 TON</div> 
-      <div class="speed-multiplier">Speed 3×</div> 
-     </div> 
-     <div class="external-countdown" id="countdown-60d"></div> 
-    </div> 
-    <div class="circle-container"> 
-     <div class="badge diamond-badge">Diamond</div>
-     <div class="circle-card" data-days="90" onclick="handlePlanClick(2,90,4,this)"> 
-      <div class="miga-points">0.0000 Mg</div> 
-      <div class="days-title">90 Days</div> 
-      <div class="ton-amount">2 TON</div> 
-      <div class="speed-multiplier">Speed 4×</div> 
-     </div> 
-     <div class="external-countdown" id="countdown-90d"></div> 
-    </div> 
-   </div> 
-   <div class="centered-row"> 
-    <div id="free-claim" class="circle-card free" onclick="collectFreePoints(this)">
-      <span class="miga-points">100 Mg</span>
-      <span class="days-title">Free Claim</span>
-    </div>
-   </div> 
-  </div> 
-  <div class="stats-bar"> 
-   <div class="stat-card"> 
-    <div class="stat-label">Total Miga</div> 
-    <div class="stat-value"><span id="points-total">0.0000</span> Mg</div> 
-   </div> 
-   <div class="stat-card"> 
-    <div class="stat-label">Mining Rate</div> 
-    <div class="stat-value"><span id="points-rate">0.0000</span> Mg/sec</div> 
-   </div> 
-   <div class="stat-card"> 
-    <div class="stat-label">Active Plans</div> 
-    <div class="stat-value"><span id="active-plans">0</span></div> 
-   </div> 
-  </div> 
-  <div id="wallet-message"><i class="fas fa-wallet"></i> Connect wallet first</div> 
-  <div id="plan-message"><i class="fas fa-info-circle"></i> Plan already active</div> 
-  <div id="alert-message"></div> 
-  <div class="bottom-nav"> 
-   <div class="nav-item"><i class="fas fa-home"></i><span>Home</span></div> 
-   <div class="nav-item"><i class="fas fa-user-friends"></i><span>Referrals</span></div> 
-   <div class="nav-item active"><i class="fas fa-digging"></i><span>Mining</span></div> 
-   <div class="nav-item"><i class="fas fa-tasks"></i><span>Tasks</span></div> 
-   <div class="nav-item"><i class="fas fa-trophy"></i><span>Leaderboard</span></div> 
-  </div> 
-  <script>
-    const FREE_DAILY_LIMIT = 100;
-    const FREE_PERIOD_MS   = 24*3600*1000;  // 24 hours
-    const DAILY_POINTS_PER_PLAN = 500; // points per plan per day
-    
-    // Free bonus data
-    let freeData = JSON.parse(localStorage.getItem("freeData")) || {
-      lastReset: 0,
-      remaining: FREE_DAILY_LIMIT
-    };
-    
-    // Points and plans data
-    let pointsData = JSON.parse(localStorage.getItem("pointsData")) || {
-      totalPoints: 0,
-      activePlans: [],
-      hasEverActivatedPlan: false
-    };
-    
-    let globalRate = 0;
-    let walletConnected = false;
-    
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: "https://ibrahimbosra.github.io/Pay/tonconnect-manifest.json",
-      buttonRootId: "ton-connect",
-      language: "en"
-    });
-    
-    // Update wallet status
-    tonConnectUI.onStatusChange(info => {
-      walletConnected = !!(info && info.account);
-      if (!walletConnected) {
-        document.getElementById("wallet-message").style.display = "block";
-      }
-    });
-    
-    function initPoints() {
-      recalcGlobalRate();
-      updatePointsDisplay();
-      resetFreeIfNeeded();
-      toggleFreeClaim();
-      updateStats();
-      
-      // Start points update every second
-      setInterval(() => {
-        updatePoints();
-        toggleFreeClaim();
-      }, 1000);
-      
-      // Start timers for active plans
-      pointsData.activePlans.forEach(plan => {
-        const el = document.querySelector(`.circle-card[data-days="${plan.days}"]`);
-        if (el) startMining(plan, el);
-      });
-    }
-    
-    // Recalculate global rate
-    function recalcGlobalRate() {
-      globalRate = pointsData.activePlans.reduce((sum, plan) => {
-        return sum + (plan.multiplier * DAILY_POINTS_PER_PLAN) / 86400;
-      }, 0);
-    }
-    
-    // Update points
-    function updatePoints() {
-      pointsData.totalPoints += globalRate;
-      savePointsData();
-      updatePointsDisplay();
-    }
-    
-    // Update points display
-    function updatePointsDisplay() {
-      document.getElementById("points-total").textContent = pointsData.totalPoints.toFixed(4);
-      document.getElementById("points-rate").textContent = globalRate.toFixed(4);
-    }
-    
-    // Update stats
-    function updateStats() {
-      document.getElementById("active-plans").textContent = pointsData.activePlans.length;
-    }
-    
-    // Save points data
-    function savePointsData() {
-      localStorage.setItem("pointsData", JSON.stringify(pointsData));
-    }
-    
-    // Reset daily bonus if needed
-    function resetFreeIfNeeded() {
-      const now = Date.now();
-      if (now - freeData.lastReset >= FREE_PERIOD_MS) {
-        freeData.lastReset = now;
-        freeData.remaining = FREE_DAILY_LIMIT;
-        localStorage.setItem("freeData", JSON.stringify(freeData));
-      }
-    }
-    
-    // Update free claim button state
-    function toggleFreeClaim() {
-      resetFreeIfNeeded();
-      const btn = document.getElementById("free-claim");
-      const now = Date.now();
-      const timeLeft = (freeData.lastReset + FREE_PERIOD_MS) - now;
-      
-      if (pointsData.activePlans.length > 0 && freeData.remaining > 0) {
-        btn.classList.add("active");
-        btn.classList.remove("disabled");
-        btn.querySelector(".miga-points")
-           .innerText = `${freeData.remaining.toFixed(0)} Mg`;
-        btn.querySelector(".days-title")
-           .innerText = `Free Daily`;
-      } else {
-        btn.classList.remove("active");
-        btn.classList.add("disabled");
-        if (freeData.remaining <= 0) {
-          // Show refill timer without "Locked" text
-          const h = Math.floor(timeLeft/3600000);
-          const m = Math.floor((timeLeft%3600000)/60000);
-          const s = Math.floor((timeLeft%60000)/1000);
-          btn.querySelector(".miga-points")
-             .innerText = `Wait ${h}h ${m}m ${s}s`;
-          btn.querySelector(".days-title")
-             .innerText = ``;
-        } else {
-          btn.querySelector(".miga-points").innerText = `Free`;
-          btn.querySelector(".days-title")
-             .innerText = `Claim`;
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miga Mining - Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --secondary: #004d99;
+            --accent: #ff9900;
+            --dark: #001a33;
+            --light: #f0f7ff;
+            --success: #28a745;
+            --danger: #dc3545;
         }
-      }
-    }
-    
-    // Claim free points
-    function collectFreePoints(el) {
-      // التحقق من وجود خطط مفعلة سابقاً
-      if (!pointsData.hasEverActivatedPlan) {
-        document.getElementById('alert-message').innerHTML = '<i class="fas fa-exclamation-triangle"></i> You must activate at least one plan once to enable the button permanently.';
-        document.getElementById('alert-message').style.display = 'block';
-        setTimeout(() => {
-          document.getElementById('alert-message').style.display = 'none';
-        }, 5000);
-        return;
-      }
-      
-      if (!el.classList.contains("active")) {
-        toggleFreeClaim();
-        return;
-      }
-      
-      const bonus = 1;  // One point per click
-      freeData.remaining = Math.max(0, freeData.remaining - bonus);
-      freeData.lastReset = freeData.lastReset;
-      localStorage.setItem("freeData", JSON.stringify(freeData));
-      
-      pointsData.totalPoints += bonus;
-      savePointsData();
-      updatePointsDisplay();
-      
-      el.classList.add("collected");
-      setTimeout(() => el.classList.remove("collected"), 800);
-      
-      toggleFreeClaim();
-    }
-    
-    function showPlanMessage() {
-      document.getElementById("plan-message").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("plan-message").style.display = "none";
-      }, 3000);
-    }
-    
-    function handlePlanClick(priceTon, days, multiplier, el) {
-      if (!walletConnected) {
-        tonConnectUI.openModal();
-        document.getElementById("wallet-message").style.display = "block";
-        setTimeout(() => {
-          document.getElementById("wallet-message").style.display = "none";
-        }, 5000);
-        return;
-      }
-      
-      if (pointsData.activePlans.find(p => p.days === days)) {
-        document.getElementById("plan-message").innerHTML = 
-          `<i class="fas fa-info-circle"></i> This plan is already active!`;
-        showPlanMessage();
-        return;
-      }
-      
-      const plan = {
-        days, multiplier,
-        startTime: Date.now(),
-        accumulatedPoints: 0
-      };
-      
-      pointsData.activePlans.push(plan);
-      pointsData.hasEverActivatedPlan = true; 
-      savePointsData();
-      recalcGlobalRate();
-      updatePointsDisplay();
-      updateStats();
-      startMining(plan, el);
-      toggleFreeClaim();
-      
-      window.location.href =
-        `ton://transfer/UQADR_wO9cnAQYUGErMlhP57EFWK78aubu20uxUw-n63Tuo4?amount=${
-          Math.floor(priceTon*1e9)
-        }&text=Miga%20Mining`;
-    }
-    
-    function startMining(plan, el) {
-      el.classList.add("active-pulse");
-      const totalSec = plan.days * 86400;
-      let elapsed = Math.floor((Date.now() - plan.startTime)/1000);
-      const cd = document.getElementById(`countdown-${plan.days}d`);
-      const mp = el.querySelector(".miga-points");
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark), var(--secondary));
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 100%;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--accent), #ff7700);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 25px rgba(255, 153, 0, 0.5);
+        }
+        
+        .app-icon i {
+            font-size: 50px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--accent), #ffcc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .connect-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 153, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .custom-wallet-info {
+            background: rgba(0, 40, 80, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .wallet-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .wallet-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00cc66, #00994d);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wallet-icon i {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .wallet-details {
+            text-align: left;
+            flex-grow: 1;
+        }
+        
+        .wallet-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .wallet-status {
+            font-size: 0.9rem;
+            color: #aee9f7;
+        }
+        
+        .custom-app-info {
+            background: rgba(0, 60, 120, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .app-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), #0088ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .app-logo i {
+            font-size: 20px;
+            color: white;
+        }
+        
+        .app-details {
+            flex-grow: 1;
+        }
+        
+        .app-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .app-description {
+            font-size: 0.9rem;
+            color: #aee9f7;
+        }
+        
+        #ton-connect {
+            margin-top: 20px;
+        }
+        
+        .disclaimer {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 25px;
+            padding: 0 10px;
+        }
+        
+        .telegram-footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="app-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+            <h1>Miga Mining</h1>
+            <p class="subtitle">ربط محفظتك بأمان لبدء تعدين Miga</p>
+        </div>
+        
+        <div class="connect-section">
+            <h2 class="section-title">
+                <i class="fas fa-link"></i> ربط المحفظة
+            </h2>
             
-      if (el._timer) clearInterval(el._timer);
-      
-      // Show the countdown element
-      cd.style.display = "block";
-      
-      el._timer = setInterval(() => {
-        elapsed++;
-        const rem = totalSec - elapsed;
+            <div class="custom-wallet-info">
+                <div class="wallet-meta">
+                    <div class="wallet-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="wallet-details">
+                        <div class="wallet-name">محفظة TON</div>
+                        <div class="wallet-status">في انتظار الربط...</div>
+                    </div>
+                </div>
+                
+                <div class="custom-app-info">
+                    <div class="app-meta">
+                        <div class="app-logo">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <div class="app-details">
+                            <div class="app-name">Miga Mining App</div>
+                            <div class="app-description">تطبيق التعدين داخل تليجرام</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- زر ربط المحفظة مع تخصيصه -->
+            <div id="ton-connect"></div>
+            
+            <p class="disclaimer">
+                يتم ربط المحفظة مباشرة عبر بيئة تليجرام الآمنة. لن يتم مشاركة أي بيانات مع أطراف خارجية.
+            </p>
+        </div>
         
-        if (rem < 0) {
-          clearInterval(el._timer);
-          el.classList.remove("active-pulse");
-          cd.innerText = "Completed";
-          pointsData.activePlans =
-            pointsData.activePlans.filter(p => p.days !== plan.days);
-          savePointsData();
-          recalcGlobalRate();
-          updatePointsDisplay();
-          updateStats();
-          toggleFreeClaim();
-          
-          // Hide countdown after 5 seconds
-          setTimeout(() => {
-            cd.style.display = "none";
-          }, 5000);
-          return;
+        <div class="telegram-footer">
+            <i class="fab fa-telegram"></i>
+            <span>يعمل حصريًا داخل تطبيق تليجرام</span>
+        </div>
+    </div>
+
+    <script>
+        // تكوين TON Connect مع تخصيص الواجهة
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: "https://ibrahimbosra.github.io/Pay/tonconnect-manifest.json",
+            buttonRootId: "ton-connect",
+            language: "ar",
+            uiPreferences: {
+                theme: "DARK",
+                colorsSet: {
+                    tonconnect: '#ff9900' // لون برتقالي يطابق التصميم
+                }
+            }
+        });
+        
+        // تخصيص واجهة ربط المحفظة
+        tonConnectUI.uiOptions = {
+            modal: 'ios', // استخدام تصميم يشبه iOS
+            actionsConfiguration: {
+                returnStrategy: 'back', // العودة للتطبيق بدلاً من البقاء في المتصفح
+            },
+            enableAndroidBackHandler: true
+        };
+        
+        // إخفاء معلومات الرابط الأصلية
+        function hideOriginalLinkInfo() {
+            // يمكنك إضافة المزيد من التخصيصات هنا
+            console.log("تم إخفاء معلومات الرابط الأصلية");
         }
         
-        const d = Math.floor(rem/86400),
-              h = Math.floor((rem%86400)/3600),
-              m = Math.floor((rem%3600)/60),
-              s = rem%60;
-              
-        cd.innerText = `${d}d ${h}h ${m}m ${s}s`;
-        plan.accumulatedPoints += (plan.multiplier * DAILY_POINTS_PER_PLAN) / 86400;
-        mp.innerText = `${plan.accumulatedPoints.toFixed(4)} Mg`;
-        savePointsData();
-      }, 1000);
-    }
-    
-    document.addEventListener("DOMContentLoaded", initPoints);
-  </script> 
- </body>
-  </html>
+        // عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            // محاولة إخفاء معلومات الرابط
+            hideOriginalLinkInfo();
+            
+            // إذا كنا في بيئة تليجرام، نقوم بتوسيع التطبيق
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.expand();
+                Telegram.WebApp.enableClosingConfirmation();
+            }
+        });
+        
+        // تحديث حالة المحفظة
+        tonConnectUI.onStatusChange(wallet => {
+            const walletStatus = document.querySelector('.wallet-status');
+            if (wallet) {
+                walletStatus.textContent = "محفظة موصولة بنجاح";
+                walletStatus.style.color = "#7adea1";
+                
+                // إخفاء زر الربط بعد الاتصال
+                document.getElementById('ton-connect').style.display = 'none';
+            } else {
+                walletStatus.textContent = "في انتظار الربط...";
+                walletStatus.style.color = "#aee9f7";
+            }
+        });
+        
+        // إعادة توجيه المستخدم إذا حاول فتح التطبيق خارج تليجرام
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            document.body.innerHTML = `
+                <div style="text-align: center; padding: 50px 20px;">
+                    <h1 style="color: #ff9900; margin-bottom: 20px;">Miga Mining</h1>
+                    <p style="font-size: 1.2rem; margin-bottom: 30px;">
+                        هذا التطبيق يعمل حصريًا داخل تطبيق تليجرام.
+                    </p>
+                    <p style="margin-bottom: 40px;">
+                        يرجى فتح البوت في تليجرام واستخدام التطبيق من هناك.
+                    </p>
+                    <div style="margin-top: 30px; opacity: 0.8;">
+                        <i class="fab fa-telegram" style="font-size: 3rem;"></i>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
